@@ -25,10 +25,10 @@
         .calendar td { cursor: pointer; position: relative; }
         .calendar td:hover { background-color: #f0f0f0; }
         .calendar td.disabled { color: #ccc; cursor: not-allowed; }
-        .calendar .task-count { position: absolute; top: 4px; right: 4px; border-radius: 50%; padding: 2px 6px; font-size: 12px; color: white; display: flex; align-items: center; justify-content: center; }
-        .task-count.low { background: #3c763d; } /* Green for low priority */
-        .task-count.medium { background: #856404; } /* Yellow for medium priority */
-        .task-count.high { background: #721c24; } /* Red for high priority */
+        .calendar .task-count { position: absolute; bottom: 2px; left: 2px; border-radius: 50%; padding: 2px 4px; font-size: 10px; color: white; display: inline-flex; align-items: center; justify-content: center; }
+        .task-count.important { background: #f44336; } /* Red for important */
+        .task-count.general { background: #ffeb3b; } /* Yellow for general */
+        .task-count.low { background: #4caf50; } /* Green for not urgent */
         .add-task-form { display: flex; flex-direction: column; margin-bottom: 20px; }
         .add-task-form input, .add-task-form select { padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; }
         .add-task-form button { padding: 10px; background-color: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -43,9 +43,9 @@
             <input type="text" id="task-title" placeholder="任务标题">
             <input type="date" id="task-date">
             <select id="task-priority">
-                <option value="low">低优先级</option>
-                <option value="medium">中优先级</option>
-                <option value="high">高优先级</option>
+                <option value="low">不紧急</option>
+                <option value="medium">一般</option>
+                <option value="high">重要</option>
             </select>
             <button onclick="addTask()">添加任务</button>
         </div>
@@ -115,7 +115,7 @@
                 taskItem.innerHTML = `
                     <button class="complete-btn" onclick="toggleTaskCompletion(${task.id})">&#9633;</button>
                     <span class="title">${task.title}</span>
-                    <span class="priority priority-${task.priority}">${task.priority === 'low' ? '低优先级' : task.priority === 'medium' ? '中优先级' : '高优先级'}</span>
+                    <span class="priority priority-${task.priority}">${task.priority === 'low' ? '不紧急' : task.priority === 'medium' ? '一般' : '重要'}</span>
                     <button class="delete-btn" onclick="deleteTask(${task.id})">&times;</button>
                 `;
                 taskList.appendChild(taskItem);
@@ -142,21 +142,25 @@
                     } else if (date > lastDate) {
                         break;
                     } else {
+                        const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
                         const taskCounts = { low: 0, medium: 0, high: 0 };
                         tasks.forEach(task => {
-                            if (task.dueDate === `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`) {
-                                taskCounts[task.priority] += 1;
+                            if (task.dueDate === dateStr) {
+                                taskCounts[task.priority]++;
                             }
                         });
 
                         cell.innerText = date;
 
+                        // Create task counts with independent colors
                         Object.keys(taskCounts).forEach(priority => {
                             const count = taskCounts[priority];
                             if (count > 0) {
                                 const countElement = document.createElement('span');
                                 countElement.className = `task-count ${priority}`;
                                 countElement.innerText = count;
+                                countElement.style.fontSize = '10px'; // Reduce font size for better display
+                                countElement.style.zIndex = '10'; // Ensure it is on top
                                 cell.appendChild(countElement);
                             }
                         });
@@ -173,7 +177,7 @@
         function showTasksForDate(date) {
             const dateStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
             const tasksForDate = tasks.filter(task => task.dueDate === dateStr);
-            alert(`任务列表 (${date}号):\n` + tasksForDate.map(task => `${task.title} - ${task.priority === 'low' ? '低优先级' : task.priority === 'medium' ? '中优先级' : '高优先级'}`).join('\n'));
+            alert(`任务列表 (${dateStr}号):\n` + tasksForDate.map(task => `${task.title} - ${task.priority === 'low' ? '不紧急' : task.priority === 'medium' ? '一般' : '重要'}`).join('\n'));
         }
 
         renderTasks();
