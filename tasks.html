@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>当天任务</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .task-list {
+            margin-top: 20px;
+        }
+        .task-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>当天任务</h1>
+        <div class="task-list" id="tasksContainer"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedDate = urlParams.get('date');
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function renderTasksForDate(date) {
+            const tasksContainer = document.getElementById('tasksContainer');
+            tasksContainer.innerHTML = '';
+
+            const tasksForDate = tasks.filter(task => task.dueDate === date);
+
+            if (tasksForDate.length === 0) {
+                tasksContainer.innerHTML = '<p>没有任务。</p>';
+                return;
+            }
+
+            tasksForDate.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `<span>${task.name} - ${task.priority} - ${task.dueDate}</span>`;
+                tasksContainer.appendChild(taskItem);
+            });
+        }
+
+        if (selectedDate) {
+            renderTasksForDate(selectedDate);
+        } else {
+            document.getElementById('tasksContainer').innerHTML = '<p>无效日期。</p>';
+        }
+    </script>
+</body>
+</html>
