@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间管理助手</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .task-list, .calendar {
+            margin-top: 20px;
+        }
+        .task-item {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendar-day {
+            padding: 10px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            text-align: center;
+            cursor: pointer;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .calendar-day:hover {
+            background-color: #e9e9e9;
+        }
+        .calendar-day.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>时间管理助手</h1>
+
+        <div>
+            <input type="text" id="taskName" placeholder="任务名称">
+            <input type="date" id="taskDueDate" min="" oninput="validateDate()">
+            <select id="taskPriority">
+                <option value="低">低优先级</option>
+                <option value="中">中优先级</option>
+                <option value="高">高优先级</option>
+            </select>
+            <button onclick="addTask()">添加任务</button>
+        </div>
+
+        <div class="task-list">
+            <h2>任务列表</h2>
+            <div id="tasksContainer"></div>
+        </div>
+
+        <div class="calendar">
+            <h2>日历视图</h2>
+            <div class="calendar-grid" id="calendarContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const tasks = [];
+
+        function validateDate() {
+            const taskDueDate = document.getElementById('taskDueDate');
+            const today = new Date().toISOString().split('T')[0];
+            taskDueDate.setAttribute('min', today);
+        }
+
+        function addTask() {
+            const name = document.getElementById('taskName').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+            const priority = document.getElementById('taskPriority').value;
+
+            if (name && dueDate) {
+                tasks.push({ name, dueDate, priority });
+                tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)); // 按日期排序
+                renderTasks();
+                renderCalendar();
+                document.getElementById('taskName').value = '';
+                document.getElementById('taskDueDate').value = '';
+                document.getElementById('taskPriority').value = '中';
+            }
+        }
+
+        function renderTasks() {
+            const tasksContainer = document.getElementById('tasksContainer');
+            tasksContainer.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `<span>${task.name} - ${task.priority} - ${task.dueDate}</span>`;
+                tasksContainer.appendChild(taskItem);
+            });
+        }
+
+        function renderCalendar() {
+            const calendarContainer = document.getElementById('calendarContainer');
+            calendarContainer.innerHTML = '';
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const emptyDay = document.createElement('div');
+                calendarContainer.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(today.getFullYear(), today.getMonth(), day);
+                const calendarDay = document.createElement('div');
+                calendarDay.className = 'calendar-day';
+                calendarDay.innerText = day;
+
+                calendarDay.onclick = () => {
+                    window.location.href = `tasks.html?date=${date.toISOString().split('T')[0]}`;
+                };
+
+                calendarContainer.appendChild(calendarDay);
+            }
+        }
+
+        validateDate();
+        renderCalendar();
+    </script>
+</body>
+</html>
